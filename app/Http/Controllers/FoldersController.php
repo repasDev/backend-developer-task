@@ -12,7 +12,7 @@ use Psy\Util\Json;
 
 class FoldersController extends Controller
 {
-    public function  index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $sortDirection = $request->input("sort");
         $filter = $request->input("filter");
@@ -32,7 +32,6 @@ class FoldersController extends Controller
 
     public function show(Folder $folder): JsonResponse
     {
-        // Is this good? Or N+1?
         $response = $folder->notes()->get();
 
         return response()->json($response, 200);
@@ -53,9 +52,9 @@ class FoldersController extends Controller
     public function update(UpdateFolderPutRequest $request, Folder $folder): JsonResponse
     {
         $id = Auth::id();
-        $folder_id = $folder->getAttributeValue('user_id');
+        $userIdOfFolder = $folder->getAttributeValue('user_id');
 
-        if ($id == $folder_id) {
+        if ($id == $userIdOfFolder) {
             $folder->update([
                 'title' => $request->input("title")
             ]);
@@ -66,9 +65,9 @@ class FoldersController extends Controller
     public function delete(Folder $folder): JsonResponse
     {
         $id = Auth::id();
-        $folder_id = $folder->getAttributeValue('user_id');
+        $userIdOfFolder = $folder->getAttributeValue('user_id');
 
-        if ($id == $folder_id){
+        if ($id == $userIdOfFolder){
             $folder->delete();
         }
         else { return response()->json("unauthorized", 401); }

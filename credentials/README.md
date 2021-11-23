@@ -1,3 +1,4 @@
 # Credentials
 
-Provide a file with a list of usernames and passwords that we can use for testing.
+- UserName = Klemen, Email = klemen@gmail.com, Password = 12345678
+- UserName = Alen, Email = alen@gmail.com, Password = 12341234

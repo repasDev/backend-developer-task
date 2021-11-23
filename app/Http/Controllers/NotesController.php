@@ -14,31 +14,15 @@ use Psy\Util\Json;
 class NotesController extends Controller
 {
 
-    public function  index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-
         $id = Auth::id();
 
-        /*return Folder::with(['notes'])
-          ->whereRelation('notes', 'private', '=', '0')
-          //->orWhere('user_id', '=', $id)
-          ->orWhereRelation('notes', 'user_id', '=', $id)
-          ->get();*/
-
-//        query = Note::where('private','=', 0)
-//         ->orWhere('user_id', '=', $id);
-
-        $query = Folder::with(['notes'])
-            ->whereRelation('notes','private','=', 0)
-            ->orWhereRelation('notes','user_id', '=', $id);
+        $query = Note::query()->where('private','=', 0)
+         ->orWhere('user_id', '=', $id);
 
         $sortDirection = $request->input("sort");
-        $filter = $request->input("filter");
         $column = $request->input("columnName");
-
-        if($filter){
-            $query->whereRaw( "" . $column . " LIKE '%" . $filter .  "%'");
-        }
 
         if($sortDirection) {
             $query->orderBy($column, $sortDirection);
@@ -48,19 +32,12 @@ class NotesController extends Controller
         return response()->json($response, 200);
     }
 
-    public function  publicNotes(Request $request): JsonResponse
+    public function publicNotes(Request $request): JsonResponse
     {
-        $query = Folder::with(['notes'])
-            ->whereRelation('notes', 'private','=', 0);
         $query = Note::where('private','=', 0);
 
         $sortDirection = $request->input("sort");
-        $filter = $request->input("filter");
         $column = $request->input("columnName");
-
-        if($filter){
-            $query->whereRaw( "" . $column . " LIKE '%" . $filter .  "%'");
-        }
 
         if($sortDirection) {
             $query->orderBy($column, $sortDirection);
@@ -81,23 +58,12 @@ class NotesController extends Controller
             return response()->json($note, 200);
         }
         else { return response()->json('unauthorized', 401);}
-
     }
 
-
-    // must check if folder id belongs to user
     public function store(StoreNotePostRequest $request): JsonResponse
     {
-        //$note = Note::create($request->all());/
         $id = Auth::id();
-        $note = Note::create([
-            'user_id' => $id,
-            'folder_id' => $request->input('folder_id'),
-            'private' => $request->input('private'),
-            'type' => $request->input('type'),
-            'title' => $request->input('title'),
-            'text' => $request->input('text')
-        ]);
+        $note = Note::create(array_merge(['user_id' => $id], $request->all()));
 
         return response()->json($note, 201);
     }
@@ -118,8 +84,14 @@ class NotesController extends Controller
 
     public function delete(Note $note): JsonResponse
     {
-        $note->delete();
+        $id = Auth::id();
+        $userIdOfNote = $note->getAttributeValue('user_id');
 
-        return response()->json('deleted', 204);
+        if ($id == $userIdOfNote){
+            $note->delete();
+        }
+        else { return response()->json("unauthorized", 401); }
+
+        return response()->json("deleted", 204);
     }
 }

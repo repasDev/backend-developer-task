@@ -1,11 +1,19 @@
-# Setup
+## Installation
 
-Provide a file with instructions on how to set up and use the API:
-* dependencies
-* variables to be set
-* run configs
-* file system permissions
-* ...
+After cloning the project connect your database in the .env located in the root folder
 
-### Optional
-You can provide Docker and Docker Compose files instead.
+Then proceed to migrate and seed the database with
+```sh
+php artisan migrate --seed
+```
+
+The application can then be run by using
+```sh
+php artisan serve
+```
+
+## Testing
+To ensure the app is working as intended, we can run tests by using
+```sh
+vendor/bin/phpunit
+```
